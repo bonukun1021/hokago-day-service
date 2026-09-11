@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>放課後等デイサービス 記録アプリ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1F4F9; --paper:#FFFFFF; --ink:#233044; --ink-soft:#647089;
+    --accent:#3E6AE1; --accent-soft:#E4EBFC; --line:#E4E8F0; --border:#D7DCE6;
+    --good:#3FA772; --normal:#D9A426; --bad:#DD5B4E;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans JP',sans-serif;-webkit-font-smoothing:antialiased;}
+  .app{max-width:520px;margin:0 auto;padding:16px 14px 60px;}
+  header.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  header.top h1{font-family:'Zen Maru Gothic',sans-serif;font-weight:700;font-size:18px;margin:0;}
+  .staff-badge{font-size:12px;color:var(--ink-soft);border:1.5px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;background:#fff;white-space:nowrap;}
+
+  .child-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;}
+  .child-chip{flex:0 0 auto;padding:9px 16px;border-radius:20px;border:1.5px solid var(--border);background:#fff;color:var(--ink-soft);font-weight:600;font-size:13.5px;cursor:pointer;white-space:nowrap;}
+  .child-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .child-chip.add{color:var(--accent);border-style:dashed;}
+
+  .date-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:14px;}
+  .date-nav button{border:none;background:none;font-size:18px;color:var(--accent);cursor:pointer;padding:4px 10px;}
+  .date-nav .date-label{font-weight:700;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;}
+  .date-nav .today-btn{font-size:11.5px;color:var(--accent);border:1px solid var(--accent);border-radius:12px;padding:2px 8px;cursor:pointer;background:#fff;}
+
+  .card{background:var(--paper);border:1.5px solid var(--border);border-radius:14px;padding:16px 14px;margin-bottom:14px;}
+  h2.section-title{font-family:'Zen Maru Gothic',sans-serif;font-size:14px;font-weight:700;color:var(--accent);margin:0 0 10px;}
+  .summary-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:2px;}
+  .summary-pill{background:var(--accent-soft);color:var(--accent);font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:20px;}
+
+  .btn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+  .btn-grid.cols3{grid-template-columns:repeat(3,1fr);}
+  .btn-grid.cols4{grid-template-columns:repeat(2,1fr);}
+  .log-btn{border:1.5px solid var(--border);background:#fff;border-radius:10px;padding:12px 6px;font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;text-align:center;line-height:1.3;}
+  .log-btn:active{transform:translateY(1px);}
+  .log-btn.good{border-color:var(--good);color:var(--good);}
+  .log-btn.normal{border-color:var(--normal);color:var(--normal);}
+  .log-btn.bad{border-color:var(--bad);color:var(--bad);}
+  .log-btn.toilet1{border-color:#6C8DE0;color:#6C8DE0;}
+  .log-btn.toilet2{border-color:#8E6CE0;color:#8E6CE0;}
+
+  .memo-row{display:flex;gap:8px;margin-top:10px;}
+  .memo-row input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:9px 10px;font-family:inherit;font-size:13.5px;}
+  .memo-row button{border:none;background:var(--accent);color:#fff;border-radius:8px;padding:0 16px;font-weight:700;font-size:13px;cursor:pointer;}
+
+  .timeline{margin-top:4px;}
+  .log-item{display:flex;gap:10px;padding:10px 0;border-top:1px dashed var(--border);align-items:flex-start;}
+  .log-item:first-child{border-top:none;}
+  .log-time{font-weight:700;font-size:12.5px;color:var(--ink-soft);width:42px;flex:0 0 auto;padding-top:1px;}
+  .log-body{flex:1;font-size:13.5px;}
+  .log-label{font-weight:600;}
+  .log-staff{font-size:11.5px;color:var(--ink-soft);margin-top:1px;}
+  .log-del{border:none;background:none;color:var(--border);font-size:16px;cursor:pointer;padding:0 4px;}
+  .empty{color:var(--ink-soft);font-size:13px;padding:10px 2px;}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(20,26,40,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;}
+  .modal{background:#fff;border-radius:14px;padding:20px;max-width:340px;width:100%;}
+  .modal h3{margin:0 0 12px;font-family:'Zen Maru Gothic',sans-serif;font-size:15px;}
+  .modal input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;font-size:14px;margin-bottom:12px;}
+  .modal .row{display:flex;gap:8px;justify-content:flex-end;}
+  .modal button{border:none;border-radius:8px;padding:9px 16px;font-weight:700;font-size:13.5px;cursor:pointer;}
+  .modal button.cancel{background:var(--line);color:var(--ink-soft);}
+  .modal button.ok{background:var(--accent);color:#fff;}
+
+  .child-manage{margin-top:8px;}
+  .child-manage-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13.5px;}
+  .child-manage-item button{border:none;background:none;color:var(--bad);font-size:12px;cursor:pointer;}
+  footer.note{text-align:center;font-size:11px;color:var(--ink-soft);margin-top:18px;}
+  .status{text-align:center;font-size:12.5px;color:var(--ink-soft);padding:30px 0;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>📋 きろく</h1>
+    <div class="staff-badge" id="staffBadge">記録者を設定</div>
+  </header>
+
+  <div id="mainArea">
+    <div class="status">読み込み中...</div>
+  </div>
+
+  <footer class="note">記録はチーム全員のスマホ・PCにリアルタイムで共有されます</footer>
+</div>
+
+<div id="modalRoot"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

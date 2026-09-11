@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 匿名ログイン済み（＝このアプリを開いた人）だけが読み書きできる。
+    // このアプリを知らない第三者からは読み書きできない最低限のルール。
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
